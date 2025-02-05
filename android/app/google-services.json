@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "189064024113",
+    "project_id": "income-3bd52",
+    "storage_bucket": "income-3bd52.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:189064024113:android:c0225d1780d5785f590510",
+        "android_client_info": {
+          "package_name": "com.example.income_buddy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCakQJf86njQ9m2CW3qvigkIqZ4SDTiQcY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
