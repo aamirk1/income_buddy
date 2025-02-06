@@ -11,6 +11,7 @@ class SignUpScreen extends StatefulWidget {
 class _SignUpScreenState extends State<SignUpScreen> {
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final TextEditingController _emailController = TextEditingController();
+  final TextEditingController _phoneController = TextEditingController();
   final TextEditingController _nameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   final GlobalKey<FormState> _formKey = GlobalKey<FormState>();
@@ -22,42 +23,40 @@ class _SignUpScreenState extends State<SignUpScreen> {
     setState(() => _isLoading = true);
 
     try {
-      // Create user with Firebase Authentication
-      UserCredential userCredential =
-          await _auth.createUserWithEmailAndPassword(
-        email: _emailController.text.trim(),
+      UserCredential userCredential;
+      String? token;
+      String email = _emailController.text.trim();
+      String phone = _phoneController.text.trim();
+
+      userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
         password: _passwordController.text.trim(),
       );
 
-      // Get the Firebase ID token
-      String? token = await userCredential.user?.getIdToken();
+      token = await userCredential.user?.getIdToken();
 
-      // Store user details & token in Firestore
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userCredential.user!.uid)
-          .set({
+      await FirebaseFirestore.instance.collection('users').doc(phone).set({
         'uid': userCredential.user!.uid,
-        'email': _emailController.text.trim(),
-        'name': _nameController.text.trim(), // Assuming you have a name input
-        'token': token, // Store Firebase Auth token
+        'password': _passwordController.text.trim(),
+        'email': email,
+        'phone': phone,
+        'name': _nameController.text.trim(),
+        'token': token,
         'createdAt': FieldValue.serverTimestamp(),
       });
 
-      // Show success message
       ScaffoldMessenger.of(context).showSnackBar(
-        
-        SnackBar(backgroundColor: Colors.green, content: Center(child: Text('Signup Successful'))),
+        SnackBar(
+            backgroundColor: Colors.green,
+            content: Center(child: Text('Signup Successful'))),
       );
 
-      // Navigate to Home Screen
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(builder: (context) => HomeScreen()),
       );
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
-        
         SnackBar(content: Text('Error: ${e.toString()}')),
       );
     } finally {
@@ -80,14 +79,31 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 decoration: InputDecoration(labelText: 'Email'),
                 keyboardType: TextInputType.emailAddress,
                 validator: (value) =>
-                    value!.isEmpty ? 'Enter a valid email' : null,
+                    value == null || value.isEmpty ? 'Email is required' : null,
+              ),
+              TextFormField(
+                controller: _phoneController,
+                decoration: InputDecoration(labelText: 'Mobile Number'),
+                keyboardType: TextInputType.phone,
+                validator: (value) => value == null ||
+                        value.isEmpty ||
+                        !RegExp(r'^[0-9]{10}$').hasMatch(value)
+                    ? 'Enter a valid 10-digit phone number'
+                    : null,
+              ),
+              TextFormField(
+                controller: _nameController,
+                decoration: InputDecoration(labelText: 'Full Name'),
+                validator: (value) =>
+                    value == null || value.isEmpty ? 'Name is required' : null,
               ),
               TextFormField(
                 controller: _passwordController,
                 decoration: InputDecoration(labelText: 'Password'),
                 obscureText: true,
-                // validator: (value) =>
-                //     value!.length < 6 ? 'Password must be at least 6 characters' : null,
+                validator: (value) => value == null || value.isEmpty
+                    ? 'Password is required'
+                    : null,
               ),
               SizedBox(height: 20),
               _isLoading
